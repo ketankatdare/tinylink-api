@@ -27,7 +27,6 @@ public static class DependencyInjection
         services.AddScoped<GetShortLinkAnalyticsHandler>();
         services.AddScoped<ResolveShortLinkForRedirectHandler>();
         services.AddScoped<IShortLinkRepository, ShortLinkRepository>();
-        services.AddSingleton<IClock, SystemClock>();
         services.AddSingleton<IShortCodeGenerator, RandomShortCodeGenerator>();
 
         return services;

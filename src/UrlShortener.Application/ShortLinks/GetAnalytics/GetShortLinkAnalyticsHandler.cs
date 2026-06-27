@@ -2,7 +2,7 @@ using UrlShortener.Application.Abstractions;
 
 namespace UrlShortener.Application.ShortLinks.GetAnalytics;
 
-public sealed class GetShortLinkAnalyticsHandler(IShortLinkRepository shortLinkRepository, IClock clock)
+public sealed class GetShortLinkAnalyticsHandler(IShortLinkRepository shortLinkRepository)
 {
     public async Task<GetShortLinkAnalyticsResult?> HandleAsync(string code, CancellationToken cancellationToken)
     {
@@ -25,6 +25,6 @@ public sealed class GetShortLinkAnalyticsHandler(IShortLinkRepository shortLinkR
             shortLink.CreatedAtUtc,
             shortLink.ExpiresAtUtc,
             shortLink.ClickCount,
-            shortLink.IsExpired(clock.UtcNow));
+            shortLink.IsExpired(DateTimeOffset.UtcNow));
     }
 }

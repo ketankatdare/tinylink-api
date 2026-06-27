@@ -9,7 +9,7 @@ public class GetShortLinkAnalyticsHandlerTests
     [Fact]
     public async Task HandleAsync_WhenCodeNotFound_ReturnsNull()
     {
-        var handler = new GetShortLinkAnalyticsHandler(new FakeShortLinkRepository(), new FakeClock(DateTimeOffset.UtcNow));
+        var handler = new GetShortLinkAnalyticsHandler(new FakeShortLinkRepository());
 
         var result = await handler.HandleAsync("missing", CancellationToken.None);
 
@@ -19,14 +19,14 @@ public class GetShortLinkAnalyticsHandlerTests
     [Fact]
     public async Task HandleAsync_WhenCodeExists_ReturnsAnalytics()
     {
-        var createdAtUtc = new DateTimeOffset(2026, 1, 1, 10, 0, 0, TimeSpan.Zero);
-        var link = ShortLink.Create("abc123", "https://example.com", createdAtUtc, createdAtUtc.AddDays(2));
-        link.RegisterClick(createdAtUtc.AddHours(1));
+        var createdAtUtc = DateTimeOffset.UtcNow.AddHours(-2);
+        var link = ShortLink.Create("abc123", "https://example.com", createdAtUtc, DateTimeOffset.UtcNow.AddHours(2));
+        link.RegisterClick(DateTimeOffset.UtcNow.AddHours(-1));
 
         var repository = new FakeShortLinkRepository();
         repository.Add(link);
 
-        var handler = new GetShortLinkAnalyticsHandler(repository, new FakeClock(createdAtUtc.AddHours(2)));
+        var handler = new GetShortLinkAnalyticsHandler(repository);
 
         var result = await handler.HandleAsync("abc123", CancellationToken.None);
 
@@ -43,23 +43,18 @@ public class GetShortLinkAnalyticsHandlerTests
     [Fact]
     public async Task HandleAsync_WhenCodeExpired_ReturnsExpiredTrue()
     {
-        var createdAtUtc = new DateTimeOffset(2026, 1, 1, 10, 0, 0, TimeSpan.Zero);
-        var link = ShortLink.Create("abc123", "https://example.com", createdAtUtc, createdAtUtc.AddHours(1));
+        var createdAtUtc = DateTimeOffset.UtcNow.AddHours(-3);
+        var link = ShortLink.Create("abc123", "https://example.com", createdAtUtc, DateTimeOffset.UtcNow.AddMinutes(-30));
 
         var repository = new FakeShortLinkRepository();
         repository.Add(link);
 
-        var handler = new GetShortLinkAnalyticsHandler(repository, new FakeClock(createdAtUtc.AddHours(2)));
+        var handler = new GetShortLinkAnalyticsHandler(repository);
 
         var result = await handler.HandleAsync("abc123", CancellationToken.None);
 
         Assert.NotNull(result);
         Assert.True(result.IsExpired);
-    }
-
-    private sealed class FakeClock(DateTimeOffset utcNow) : IClock
-    {
-        public DateTimeOffset UtcNow { get; } = utcNow;
     }
 
     private sealed class FakeShortLinkRepository : IShortLinkRepository

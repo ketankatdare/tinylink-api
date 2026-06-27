@@ -10,7 +10,7 @@ public class ResolveShortLinkForRedirectHandlerTests
     public async Task HandleAsync_WhenCodeDoesNotExist_ReturnsNotFound()
     {
         var repository = new FakeShortLinkRepository();
-        var handler = new ResolveShortLinkForRedirectHandler(repository, new FakeClock(DateTimeOffset.UtcNow));
+        var handler = new ResolveShortLinkForRedirectHandler(repository);
 
         var result = await handler.HandleAsync("missing", CancellationToken.None);
 
@@ -23,13 +23,11 @@ public class ResolveShortLinkForRedirectHandlerTests
     [Fact]
     public async Task HandleAsync_WhenShortLinkIsExpired_ReturnsExpired()
     {
-        var createdAtUtc = new DateTimeOffset(2026, 1, 1, 10, 0, 0, TimeSpan.Zero);
+        var createdAtUtc = DateTimeOffset.UtcNow.AddHours(-2);
         var repository = new FakeShortLinkRepository();
-        repository.Add(ShortLink.Create("abc123", "https://example.com", createdAtUtc, createdAtUtc.AddMinutes(30)));
+        repository.Add(ShortLink.Create("abc123", "https://example.com", createdAtUtc, DateTimeOffset.UtcNow.AddMinutes(-1)));
 
-        var handler = new ResolveShortLinkForRedirectHandler(
-            repository,
-            new FakeClock(createdAtUtc.AddHours(1)));
+        var handler = new ResolveShortLinkForRedirectHandler(repository);
 
         var result = await handler.HandleAsync("abc123", CancellationToken.None);
 
@@ -42,15 +40,13 @@ public class ResolveShortLinkForRedirectHandlerTests
     [Fact]
     public async Task HandleAsync_WhenShortLinkIsActive_ReturnsSuccessAndIncrementsClickCount()
     {
-        var createdAtUtc = new DateTimeOffset(2026, 1, 1, 10, 0, 0, TimeSpan.Zero);
-        var link = ShortLink.Create("abc123", "https://example.com", createdAtUtc, createdAtUtc.AddDays(1));
+        var createdAtUtc = DateTimeOffset.UtcNow.AddMinutes(-5);
+        var link = ShortLink.Create("abc123", "https://example.com", createdAtUtc, DateTimeOffset.UtcNow.AddHours(1));
 
         var repository = new FakeShortLinkRepository();
         repository.Add(link);
 
-        var handler = new ResolveShortLinkForRedirectHandler(
-            repository,
-            new FakeClock(createdAtUtc.AddHours(1)));
+        var handler = new ResolveShortLinkForRedirectHandler(repository);
 
         var result = await handler.HandleAsync("abc123", CancellationToken.None);
 
@@ -59,11 +55,6 @@ public class ResolveShortLinkForRedirectHandlerTests
         Assert.Equal("https://example.com", result.OriginalUrl);
         Assert.Equal(1, link.ClickCount);
         Assert.Equal(1, repository.SaveChangesCalls);
-    }
-
-    private sealed class FakeClock(DateTimeOffset utcNow) : IClock
-    {
-        public DateTimeOffset UtcNow { get; } = utcNow;
     }
 
     private sealed class FakeShortLinkRepository : IShortLinkRepository

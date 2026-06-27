@@ -2,7 +2,7 @@ using UrlShortener.Application.Abstractions;
 
 namespace UrlShortener.Application.ShortLinks.ResolveForRedirect;
 
-public sealed class ResolveShortLinkForRedirectHandler(IShortLinkRepository shortLinkRepository, IClock clock)
+public sealed class ResolveShortLinkForRedirectHandler(IShortLinkRepository shortLinkRepository)
 {
     public async Task<ResolveShortLinkForRedirectResult> HandleAsync(string code, CancellationToken cancellationToken)
     {
@@ -19,7 +19,7 @@ public sealed class ResolveShortLinkForRedirectHandler(IShortLinkRepository shor
             return ResolveShortLinkForRedirectResult.NotFound();
         }
 
-        var nowUtc = clock.UtcNow;
+        var nowUtc = DateTimeOffset.UtcNow;
         if (shortLink.IsExpired(nowUtc))
         {
             return ResolveShortLinkForRedirectResult.ExpiredResult();

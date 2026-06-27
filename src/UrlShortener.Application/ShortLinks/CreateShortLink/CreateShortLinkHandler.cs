@@ -9,16 +9,13 @@ public sealed class CreateShortLinkHandler
 
     private readonly IShortLinkRepository _shortLinkRepository;
     private readonly IShortCodeGenerator _shortCodeGenerator;
-    private readonly IClock _clock;
 
     public CreateShortLinkHandler(
         IShortLinkRepository shortLinkRepository,
-        IShortCodeGenerator shortCodeGenerator,
-        IClock clock)
+        IShortCodeGenerator shortCodeGenerator)
     {
         _shortLinkRepository = shortLinkRepository;
         _shortCodeGenerator = shortCodeGenerator;
-        _clock = clock;
     }
 
     public async Task<CreateShortLinkResult> HandleAsync(
@@ -32,7 +29,7 @@ public sealed class CreateShortLinkHandler
             throw new ArgumentException("Original URL is required.", nameof(command));
         }
 
-        var createdAtUtc = _clock.UtcNow;
+        var createdAtUtc = DateTimeOffset.UtcNow;
 
         for (var attempt = 0; attempt < MaxCodeGenerationAttempts; attempt++)
         {
