@@ -27,6 +27,24 @@ public sealed class ShortLinkRepository(AppDbContext dbContext) : IShortLinkRepo
         return AddAndSaveAsync(shortLink, cancellationToken);
     }
 
+    public Task<ShortLink?> GetByCodeAsync(string code, CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrWhiteSpace(code))
+        {
+            return Task.FromResult<ShortLink?>(null);
+        }
+
+        var normalizedCode = code.Trim();
+
+        return dbContext.ShortLinks
+            .SingleOrDefaultAsync(shortLink => shortLink.Code == normalizedCode, cancellationToken);
+    }
+
+    public Task SaveChangesAsync(CancellationToken cancellationToken)
+    {
+        return dbContext.SaveChangesAsync(cancellationToken);
+    }
+
     private async Task AddAndSaveAsync(ShortLink shortLink, CancellationToken cancellationToken)
     {
         await dbContext.ShortLinks.AddAsync(shortLink, cancellationToken);

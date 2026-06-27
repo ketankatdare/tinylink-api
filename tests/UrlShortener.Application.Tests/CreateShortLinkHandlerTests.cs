@@ -111,5 +111,16 @@ public class CreateShortLinkHandlerTests
             _existingCodes.Add(shortLink.Code);
             return Task.CompletedTask;
         }
+
+        public Task<ShortLink?> GetByCodeAsync(string code, CancellationToken cancellationToken)
+        {
+            var item = StoredItems.FirstOrDefault(shortLink => shortLink.Code == code);
+            return Task.FromResult(item);
+        }
+
+        public Task SaveChangesAsync(CancellationToken cancellationToken)
+        {
+            return Task.CompletedTask;
+        }
     }
 }

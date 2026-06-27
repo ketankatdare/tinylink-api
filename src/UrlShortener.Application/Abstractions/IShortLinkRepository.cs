@@ -6,5 +6,9 @@ public interface IShortLinkRepository
 {
     Task<bool> CodeExistsAsync(string code, CancellationToken cancellationToken);
 
+    Task<ShortLink?> GetByCodeAsync(string code, CancellationToken cancellationToken);
+
     Task AddAsync(ShortLink shortLink, CancellationToken cancellationToken);
+
+    Task SaveChangesAsync(CancellationToken cancellationToken);
 }

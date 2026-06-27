@@ -2,8 +2,11 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using UrlShortener.Application.Abstractions;
+using UrlShortener.Application.ShortLinks.CreateShortLink;
+using UrlShortener.Application.ShortLinks.ResolveForRedirect;
 using UrlShortener.Infrastructure.Persistence;
 using UrlShortener.Infrastructure.Persistence.Repositories;
+using UrlShortener.Infrastructure.Services;
 
 namespace UrlShortener.Infrastructure;
 
@@ -19,7 +22,11 @@ public static class DependencyInjection
             options.UseNpgsql(connectionString);
         });
 
+        services.AddScoped<CreateShortLinkHandler>();
+        services.AddScoped<ResolveShortLinkForRedirectHandler>();
         services.AddScoped<IShortLinkRepository, ShortLinkRepository>();
+        services.AddSingleton<IClock, SystemClock>();
+        services.AddSingleton<IShortCodeGenerator, RandomShortCodeGenerator>();
 
         return services;
     }
