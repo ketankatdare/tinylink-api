@@ -18,33 +18,16 @@ public sealed class ShortLinksController(
     {
         var command = new CreateShortLinkCommand(request.OriginalUrl, request.ExpiresAtUtc);
 
-        try
-        {
-            var result = await createShortLinkHandler.HandleAsync(command, cancellationToken);
-            var shortUrl = $"{Request.Scheme}://{Request.Host}/{result.Code}";
+        var result = await createShortLinkHandler.HandleAsync(command, cancellationToken);
+        var shortUrl = $"{Request.Scheme}://{Request.Host}/{result.Code}";
 
-            return Created(shortUrl, new CreateShortLinkResponse(
-                result.Id,
-                result.Code,
-                shortUrl,
-                result.OriginalUrl,
-                result.CreatedAtUtc,
-                result.ExpiresAtUtc));
-        }
-        catch (ArgumentException exception)
-        {
-            return ValidationProblem(
-                title: "Invalid short link request.",
-                detail: exception.Message,
-                statusCode: StatusCodes.Status400BadRequest);
-        }
-        catch (InvalidOperationException exception)
-        {
-            return Problem(
-                title: "Unable to generate a unique short code.",
-                detail: exception.Message,
-                statusCode: StatusCodes.Status409Conflict);
-        }
+        return Created(shortUrl, new CreateShortLinkResponse(
+            result.Id,
+            result.Code,
+            shortUrl,
+            result.OriginalUrl,
+            result.CreatedAtUtc,
+            result.ExpiresAtUtc));
     }
 
     [HttpGet("{code:length(4,32):regex(^[a-zA-Z0-9]+$)}")]
