@@ -30,7 +30,7 @@ public sealed class ShortLinksController(
             result.ExpiresAtUtc));
     }
 
-    [HttpGet("{code:length(4,32):regex(^[a-zA-Z0-9]+$)}")]
+    [HttpGet("{code:length(4,32)}")]
     public async Task<IActionResult> GetAnalytics(string code, CancellationToken cancellationToken)
     {
         var result = await getShortLinkAnalyticsHandler.HandleAsync(code, cancellationToken);
@@ -50,12 +50,15 @@ public sealed class ShortLinksController(
             result.IsExpired));
     }
 
-    public sealed record CreateShortLinkRequest(
-        [property: Required]
-        [property: Url]
-        [property: MaxLength(2048)]
-        string OriginalUrl,
-        DateTimeOffset? ExpiresAtUtc);
+    public sealed class CreateShortLinkRequest
+    {
+        [Required]
+        [Url]
+        [MaxLength(2048)]
+        public required string OriginalUrl { get; init; }
+
+        public DateTimeOffset? ExpiresAtUtc { get; init; }
+    }
 
     public sealed record CreateShortLinkResponse(
         Guid Id,

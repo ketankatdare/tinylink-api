@@ -1,31 +1,39 @@
 using UrlShortener.Api;
 
-var builder = WebApplication.CreateBuilder(args);
+namespace UrlShortener.Api;
 
-builder.Logging.ClearProviders();
-builder.Logging.AddJsonConsole(options =>
+public partial class Program
 {
-    options.IncludeScopes = true;
-    options.TimestampFormat = "O ";
-});
+    public static void Main(string[] args)
+    {
+        var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-builder.Services.AddApiServices(builder.Configuration);
+        builder.Logging.ClearProviders();
+        builder.Logging.AddJsonConsole(options =>
+        {
+            options.IncludeScopes = true;
+            options.TimestampFormat = "O ";
+        });
 
-var app = builder.Build();
+        // Add services to the container.
+        builder.Services.AddApiServices(builder.Configuration);
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.MapOpenApi();
+        var app = builder.Build();
+
+        // Configure the HTTP request pipeline.
+        if (app.Environment.IsDevelopment())
+        {
+            app.MapOpenApi();
+        }
+
+        app.UseApiMiddleware();
+
+        app.UseHttpsRedirection();
+
+        app.UseAuthorization();
+
+        app.MapControllers();
+
+        app.Run();
+    }
 }
-
-app.UseApiMiddleware();
-
-app.UseHttpsRedirection();
-
-app.UseAuthorization();
-
-app.MapControllers();
-
-app.Run();

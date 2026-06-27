@@ -28,3 +28,12 @@ dotnet build
 dotnet test
 dotnet run --project src/UrlShortener.Api
 ```
+
+## Container Smoke Test
+
+```bash
+docker build -t tinylink-api:dev .
+docker run --rm -p 8080:8080 tinylink-api:dev
+# In another terminal:
+curl http://localhost:8080/health
+```

@@ -1,0 +1,16 @@
+.git
+.github
+.vs
+.vscode
+
+**/bin
+**/obj
+
+tests
+terraform
+
+docker-compose.yml
+*.log
+*.user
+*.suo
+*.db
