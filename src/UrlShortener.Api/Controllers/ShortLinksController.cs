@@ -1,12 +1,15 @@
 using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc;
 using UrlShortener.Application.ShortLinks.CreateShortLink;
+using UrlShortener.Application.ShortLinks.GetAnalytics;
 
 namespace UrlShortener.Api.Controllers;
 
 [ApiController]
 [Route("api/short-links")]
-public sealed class ShortLinksController(CreateShortLinkHandler createShortLinkHandler) : ControllerBase
+public sealed class ShortLinksController(
+    CreateShortLinkHandler createShortLinkHandler,
+    GetShortLinkAnalyticsHandler getShortLinkAnalyticsHandler) : ControllerBase
 {
     [HttpPost]
     public async Task<IActionResult> Create(
@@ -44,6 +47,26 @@ public sealed class ShortLinksController(CreateShortLinkHandler createShortLinkH
         }
     }
 
+    [HttpGet("{code:length(4,32):regex(^[a-zA-Z0-9]+$)}")]
+    public async Task<IActionResult> GetAnalytics(string code, CancellationToken cancellationToken)
+    {
+        var result = await getShortLinkAnalyticsHandler.HandleAsync(code, cancellationToken);
+
+        if (result is null)
+        {
+            return NotFound();
+        }
+
+        return Ok(new GetShortLinkAnalyticsResponse(
+            result.Id,
+            result.Code,
+            result.OriginalUrl,
+            result.CreatedAtUtc,
+            result.ExpiresAtUtc,
+            result.ClickCount,
+            result.IsExpired));
+    }
+
     public sealed record CreateShortLinkRequest(
         [property: Required]
         [property: Url]
@@ -58,4 +81,13 @@ public sealed class ShortLinksController(CreateShortLinkHandler createShortLinkH
         string OriginalUrl,
         DateTimeOffset CreatedAtUtc,
         DateTimeOffset? ExpiresAtUtc);
+
+    public sealed record GetShortLinkAnalyticsResponse(
+        Guid Id,
+        string Code,
+        string OriginalUrl,
+        DateTimeOffset CreatedAtUtc,
+        DateTimeOffset? ExpiresAtUtc,
+        long ClickCount,
+        bool IsExpired);
 }

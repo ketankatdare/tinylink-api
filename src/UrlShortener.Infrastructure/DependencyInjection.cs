@@ -3,6 +3,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using UrlShortener.Application.Abstractions;
 using UrlShortener.Application.ShortLinks.CreateShortLink;
+using UrlShortener.Application.ShortLinks.GetAnalytics;
 using UrlShortener.Application.ShortLinks.ResolveForRedirect;
 using UrlShortener.Infrastructure.Persistence;
 using UrlShortener.Infrastructure.Persistence.Repositories;
@@ -23,6 +24,7 @@ public static class DependencyInjection
         });
 
         services.AddScoped<CreateShortLinkHandler>();
+        services.AddScoped<GetShortLinkAnalyticsHandler>();
         services.AddScoped<ResolveShortLinkForRedirectHandler>();
         services.AddScoped<IShortLinkRepository, ShortLinkRepository>();
         services.AddSingleton<IClock, SystemClock>();
