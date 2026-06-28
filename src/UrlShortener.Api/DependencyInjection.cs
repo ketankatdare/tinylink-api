@@ -9,6 +9,8 @@ public static class DependencyInjection
     {
         services.AddControllers();
         services.AddOpenApi();
+        services.AddEndpointsApiExplorer();
+        services.AddSwaggerGen();
         services.AddProblemDetails();
         services.AddHealthChecks();
         services.AddInfrastructureServices(configuration);

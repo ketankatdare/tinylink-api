@@ -29,6 +29,18 @@ dotnet test
 dotnet run --project src/UrlShortener.Api
 ```
 
+## Local Database Initialization
+
+```bash
+docker compose up -d postgres
+dotnet tool restore
+dotnet tool run dotnet-ef database update \
+  --project src/UrlShortener.Infrastructure/UrlShortener.Infrastructure.csproj \
+  --startup-project src/UrlShortener.Api/UrlShortener.Api.csproj
+```
+
+PostgreSQL is exposed locally on port `55432` to avoid clashing with an existing local PostgreSQL instance.
+
 ## Container Smoke Test
 
 ```bash
